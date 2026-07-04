@@ -49,6 +49,7 @@ const api = {
     getVersion: () => ipcRenderer.invoke('system:getVersion'),
     getPlatform: () => ipcRenderer.invoke('system:getPlatform'),
     saveDatabase: () => ipcRenderer.invoke('system:saveDatabase'),
+    writeErrorLog: (text: string) => ipcRenderer.invoke('system:writeErrorLog', text),
   },
 }
 
