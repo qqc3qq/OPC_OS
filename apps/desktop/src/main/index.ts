@@ -32,6 +32,11 @@ async function createWindow(): Promise<void> {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
+    mainWindow?.webContents.openDevTools()
+  })
+
+  mainWindow.webContents.on('did-fail-load', (_e, code, desc) => {
+    console.error('Failed to load:', code, desc)
   })
 
   if (process.env.ELECTRON_RENDERER_URL) {
