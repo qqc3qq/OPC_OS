@@ -6,9 +6,8 @@ import { registerGoalHandlers } from './goals.ipc'
 import { registerAIHandlers } from './ai.ipc'
 import { registerSystemHandlers } from './system.ipc'
 
-const repos = createRepositories()
-
 export function registerAllHandlers(): void {
+  const repos = createRepositories()
   registerProjectHandlers(repos.projects)
   registerTaskHandlers(repos.tasks)
   registerNoteHandlers(repos.notes)
