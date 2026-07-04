@@ -7,3 +7,4 @@ build/
 *.db-wal
 .env
 .env.local
+.claude/
