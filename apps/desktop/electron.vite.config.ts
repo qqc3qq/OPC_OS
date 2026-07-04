@@ -4,7 +4,11 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [
+      externalizeDepsPlugin({
+        exclude: ['@ceo-os/database', '@ceo-os/shared', '@ceo-os/ai']
+      })
+    ],
     build: {
       rollupOptions: {
         external: ['sql.js']
