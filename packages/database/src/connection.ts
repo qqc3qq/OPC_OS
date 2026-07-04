@@ -1,17 +1,32 @@
-import initSqlJs, { Database as SqlJsDatabase, SqlJsStatic } from 'sql.js'
+import initSqlJs, { Database as SqlJsDatabase } from 'sql.js'
 import fs from 'fs'
 import path from 'path'
 
-let SQL: SqlJsStatic | null = null
 let db: SqlJsDatabase | null = null
 let dbPath = ''
+
+function findWasmPath(): string | undefined {
+  const candidates = [
+    // Packaged: app.asar.unpacked
+    path.join(process.resourcesPath || '', 'app.asar.unpacked', 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+    // Dev: node_modules in project root
+    path.join(process.cwd(), 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+    // Dev fallback: two levels up from __dirname (e.g., out/main -> project root)
+    path.join(__dirname, '..', '..', 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+  ]
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p
+  }
+  return undefined
+}
 
 export async function initDatabase(dataPath?: string): Promise<SqlJsDatabase> {
   if (db) return db
 
-  SQL = await initSqlJs()
-
   dbPath = dataPath || path.join(process.cwd(), 'ceo-os.db')
+
+  const wasmPath = findWasmPath()
+  const SQL = await initSqlJs(wasmPath ? { locateFile: () => wasmPath } : undefined)
 
   if (fs.existsSync(dbPath)) {
     const buffer = fs.readFileSync(dbPath)

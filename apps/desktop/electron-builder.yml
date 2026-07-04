@@ -5,8 +5,9 @@ directories:
   buildResources: resources
 files:
   - out/**/*
-  - "!node_modules/**/*"
-extraResources: []
+  - node_modules/sql.js/**/*
+asarUnpack:
+  - node_modules/sql.js/**/*
 win:
   target:
     - target: nsis
