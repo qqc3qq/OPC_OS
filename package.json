@@ -1,0 +1,19 @@
+{
+  "name": "ceo-os",
+  "private": true,
+  "version": "0.0.1",
+  "description": "AI-powered operating system for solo entrepreneurs",
+  "scripts": {
+    "dev": "pnpm --filter @ceo-os/desktop dev",
+    "build": "pnpm --filter @ceo-os/desktop build",
+    "preview": "pnpm --filter @ceo-os/desktop preview",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:migrate": "pnpm --filter @ceo-os/database migrate",
+    "db:seed": "pnpm --filter @ceo-os/database seed"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

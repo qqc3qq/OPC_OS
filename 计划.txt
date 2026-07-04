@@ -1,0 +1,714 @@
+可以，而且**既然是交给 Agent（如 Claude Code、OpenHands、Codex、Cursor Agent 等）开发，我们就不要写代码，而是直接输出一份可以执行的 PRD（产品需求文档）+ UI 原型 + 技术架构文档。**
+
+我建议把它当成一个真正的软件项目。
+
+---
+
+# 产品定位
+
+## 项目名称
+
+**CEO OS**
+
+> 一个面向个人创业者的 AI 工作操作系统。
+
+不是 ToDo。
+
+不是 Notion。
+
+不是 Trello。
+
+而是每天打开电脑后，第一个打开的软件。
+
+---
+
+# V1 MVP原则
+
+整个 V1 只有一个目标：
+
+> **每天帮助用户知道：今天该做什么。**
+
+如果能做到这一点，V1 就成功。
+
+---
+
+# 技术架构
+
+```
+CEO OS
+│
+├── Desktop
+│      React
+│      Electron
+│      Tailwind
+│
+├── Local API
+│      Node
+│
+├── SQLite
+│
+├── AI Service
+│      OpenAI
+│      Claude
+│      Gemini（以后）
+│
+└── Plugin（V2）
+```
+
+---
+
+# UI结构
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                       TOP BAR                               │
+├───────┬──────────────────────────────────────────────────────┤
+│       │                                                      │
+│       │                                                      │
+│       │                                                      │
+│MENU   │                 CONTENT                             │
+│       │                                                      │
+│       │                                                      │
+│       │                                                      │
+├───────┴──────────────────────────────────────────────────────┤
+│                    STATUS BAR                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+# 左侧菜单
+
+```
+🏠 Dashboard
+
+📁 Projects
+
+✅ Tasks
+
+📅 Calendar
+
+📝 Notes
+
+🤖 AI Assistant
+
+⚙ Settings
+```
+
+以后增加：
+
+CRM
+
+Finance
+
+Knowledge
+
+Automation
+
+---
+
+# Dashboard（首页）
+
+```
+┌─────────────────────────────────────────────────────┐
+
+👋 Good Morning
+
+今天：
+
+星期：
+
+━━━━━━━━━━━━━━━━━━━━
+
+🔥 今日最重要三件事
+
+□
+
+□
+
+□
+
+━━━━━━━━━━━━━━━━━━━━
+
+📅 今日时间轴
+
+09:00
+
+10:30
+
+14:00
+
+16:00
+
+20:00
+
+━━━━━━━━━━━━━━━━━━━━
+
+📊 五个业务
+
+淘宝
+
+████████
+
+平台
+
+██████
+
+自媒体
+
+████
+
+数据平台
+
+███
+
+Web3
+
+██
+
+━━━━━━━━━━━━━━━━━━━━
+
+🚨 待处理
+
+客户
+
+Bug
+
+供应商
+
+合作
+
+━━━━━━━━━━━━━━━━━━━━
+
+🤖 AI 今日建议
+
+━━━━━━━━━━━━━━━━━━━━
+
+📝 Quick Note
+
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+# Projects
+
+进入后显示：
+
+```
+──────────────────────────
+
+🛒 淘宝
+
+进行中
+
+12 Tasks
+
+──────────────────────────
+
+⚡ 能量平台
+
+开发中
+
+8 Tasks
+
+──────────────────────────
+
+📱 自媒体
+
+运营中
+
+20 Tasks
+
+──────────────────────────
+
+📊 数据平台
+
+开发中
+
+6 Tasks
+
+──────────────────────────
+
+🌍 Web3
+
+学习
+
+4 Tasks
+
+──────────────────────────
+```
+
+点击即可进入。
+
+---
+
+# Project Detail
+
+例如：
+
+淘宝
+
+```
+Overview
+
+Task
+
+Notes
+
+Files
+
+Goal
+
+Activity
+```
+
+右边：
+
+```
+今日任务
+
+进行中
+
+本周目标
+
+负责人（以后）
+
+进度
+
+```
+
+---
+
+# Task
+
+采用 Linear 风格。
+
+```
+Title
+
+Priority
+
+Project
+
+Due Date
+
+Status
+
+Estimate
+
+Tags
+
+Description
+
+Comment
+```
+
+状态：
+
+```
+Todo
+
+In Progress
+
+Blocked
+
+Done
+```
+
+支持：
+
+拖拽
+
+快捷键
+
+Command + K
+
+---
+
+# Calendar
+
+周视图
+
+```
+Monday
+
+Tuesday
+
+Wednesday
+
+Thursday
+
+Friday
+
+Saturday
+
+Sunday
+```
+
+任务直接拖动。
+
+---
+
+# Notes
+
+Markdown。
+
+支持：
+
+图片
+
+代码
+
+Mermaid
+
+数学公式
+
+附件
+
+---
+
+# AI Assistant
+
+聊天窗口。
+
+顶部：
+
+```
+Ask AI
+```
+
+下面：
+
+```
+今天有什么安排？
+
+帮我整理会议。
+
+帮我分析淘宝数据。
+
+帮我写短视频脚本。
+
+总结今天工作。
+
+规划下周。
+```
+
+---
+
+# SQLite 数据结构
+
+## Projects
+
+```
+id
+
+name
+
+icon
+
+color
+
+description
+
+status
+
+createdAt
+
+updatedAt
+```
+
+---
+
+## Tasks
+
+```
+id
+
+title
+
+description
+
+projectId
+
+priority
+
+status
+
+estimate
+
+dueDate
+
+createdAt
+
+updatedAt
+```
+
+---
+
+## Notes
+
+```
+id
+
+title
+
+content
+
+projectId
+
+createdAt
+
+updatedAt
+```
+
+---
+
+## Goals
+
+```
+id
+
+title
+
+projectId
+
+progress
+
+deadline
+```
+
+---
+
+# V1功能
+
+✅ Dashboard
+
+✅ Projects
+
+✅ Tasks
+
+✅ Calendar
+
+✅ Notes
+
+✅ AI Chat
+
+---
+
+# V2
+
+自动同步：
+
+淘宝
+
+TG
+
+Discord
+
+Notion
+
+GitHub
+
+Google Calendar
+
+n8n
+
+Telegram Bot
+
+---
+
+# V3
+
+AI Agent
+
+例如：
+
+```
+每天9点
+
+↓
+
+检查淘宝
+
+↓
+
+发现广告下降
+
+↓
+
+自动提醒
+
+↓
+
+生成优化方案
+
+↓
+
+等待确认
+
+↓
+
+自动执行
+```
+
+---
+
+# UI 风格
+
+建议：
+
+Apple + Linear + Raycast
+
+关键词：
+
+```
+极简
+
+留白
+
+圆角
+
+毛玻璃
+
+深色模式
+
+动画流畅
+
+快捷键驱动
+
+命令面板
+
+响应速度快
+```
+
+---
+
+# 配色
+
+```
+Background
+
+#09090B
+
+Card
+
+#18181B
+
+Border
+
+#27272A
+
+Primary
+
+#3B82F6
+
+Success
+
+#10B981
+
+Warning
+
+#F59E0B
+
+Danger
+
+#EF4444
+```
+
+---
+
+# 字体
+
+Windows：
+
+Inter
+
+Mac：
+
+SF Pro
+
+中文：
+
+思源黑体（Source Han Sans）
+
+---
+
+# 开发目录
+
+```
+apps/
+    desktop/
+
+packages/
+    ui/
+
+    database/
+
+    ai/
+
+    shared/
+
+    config/
+
+docs/
+
+assets/
+```
+
+---
+
+## 🚀 部署说明（交给 Agent）
+
+建议采用 **Monorepo** 结构，便于后续扩展。
+
+### 开发环境
+
+* Node.js 22 LTS
+* pnpm（包管理器）
+* React + TypeScript
+* Electron（桌面端）
+* Tailwind CSS
+* shadcn/ui
+* SQLite（本地数据库，推荐 better-sqlite3）
+* Zustand（状态管理）
+* React Router（页面路由）
+* Vite（构建工具）
+* Zod（数据校验）
+
+### 初始化步骤
+
+1. 创建 Monorepo（pnpm workspace）。
+2. 初始化 Electron + React + Vite 项目。
+3. 集成 Tailwind 和 shadcn/ui。
+4. 建立 SQLite 数据库及迁移机制。
+5. 创建 Projects、Tasks、Notes、Goals 四张基础表。
+6. 完成 Dashboard、Projects、Tasks、Calendar、Notes、AI 六个页面。
+7. 封装统一的数据访问层（Repository），UI 不直接操作数据库。
+8. AI Provider 采用接口设计，V1 默认接 OpenAI，后续可替换 Claude、Gemini 等。
+
+### 打包
+
+* Windows：NSIS 安装包（`.exe`）
+* macOS：DMG
+* Linux：AppImage
+
+---
+
+## 我建议再增加一个原则（这会决定软件能否长期使用）
+
+不要把它做成"任务管理软件"，而要做成**创业控制中心**。
+
+也就是说，**首页永远只回答三个问题：**
+
+1. **今天最应该做什么？**
+2. **哪个业务最值得投入？**
+3. **今天有没有风险需要处理？**
+
+所有其他功能（任务、笔记、AI、日历）都只是为了帮助回答这三个问题。
+
+---
+
+### 我建议 V1 结束后，下一步直接进入 **V1.5：AI 原生版本**。
+
+它不是简单接入聊天框，而是让 AI 能主动分析你的项目、任务和业务数据，并每天给出工作建议。这样它会比市面上的 Notion、Trello 更有价值，也更符合你多业务并行的工作模式。
