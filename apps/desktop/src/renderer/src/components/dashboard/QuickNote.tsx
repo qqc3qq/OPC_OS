@@ -7,6 +7,7 @@ const QUICK_NOTE_ID = 'quick-note-dashboard'
 export function QuickNote(): JSX.Element {
   const [content, setContent] = useState('')
   const [saving, setSaving] = useState(false)
+  const noteIdRef = useRef<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
@@ -14,6 +15,7 @@ export function QuickNote(): JSX.Element {
       const notes = await window.api.notes.getAll()
       const quick = notes.find(n => n.title === 'Quick Note')
       if (quick) {
+        noteIdRef.current = quick.id
         setContent(quick.content)
       }
     }
@@ -25,13 +27,14 @@ export function QuickNote(): JSX.Element {
     setSaving(true)
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(async () => {
-      const notes = await window.api.notes.getAll()
-      const quick = notes.find(n => n.title === 'Quick Note')
-      if (quick) {
-        await window.api.notes.update(quick.id, { content: value })
-      } else {
-        await window.api.notes.create({ title: 'Quick Note', content: value })
-      }
+      try {
+        if (noteIdRef.current) {
+          await window.api.notes.update(noteIdRef.current, { content: value })
+        } else {
+          const note = await window.api.notes.create({ title: 'Quick Note', content: value })
+          noteIdRef.current = note.id
+        }
+      } catch { /* ignore save errors */ }
       setSaving(false)
     }, 500)
   }

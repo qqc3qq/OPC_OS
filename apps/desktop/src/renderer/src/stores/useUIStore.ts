@@ -8,7 +8,7 @@ interface UIState {
   toggleSidebar: () => void
   setCommandPaletteOpen: (open: boolean) => void
   toggleTheme: () => void
-  addToast: (toast: Omit<Toast, 'id'>) => void
+  addToast: (toast: Toast) => void
   removeToast: (id: string) => void
 }
 
@@ -33,7 +33,7 @@ export const useUIStore = create<UIState>((set) => ({
     return { theme: next }
   }),
   addToast: (toast) => set(s => ({
-    toasts: [...s.toasts, { ...toast, id: crypto.randomUUID() }]
+    toasts: [...s.toasts, toast]
   })),
   removeToast: (id) => set(s => ({
     toasts: s.toasts.filter(t => t.id !== id)

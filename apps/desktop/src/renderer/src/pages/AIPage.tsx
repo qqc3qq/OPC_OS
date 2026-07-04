@@ -17,6 +17,7 @@ export function AIPage(): JSX.Element {
   ])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const sendingRef = useRef(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -27,13 +28,14 @@ export function AIPage(): JSX.Element {
 
   async function handleSend(text?: string) {
     const messageText = text || input
-    if (!messageText.trim() || sending) return
+    if (!messageText.trim() || sendingRef.current) return
 
     const userMsg: AIMessage = { role: 'user', content: messageText }
     const newMessages = [...messages, userMsg]
     setMessages(newMessages)
     setInput('')
     setSending(true)
+    sendingRef.current = true
 
     try {
       const apiKey = localStorage.getItem('ceo-os-openai-key') || ''
@@ -53,6 +55,7 @@ export function AIPage(): JSX.Element {
       }])
     }
     setSending(false)
+    sendingRef.current = false
   }
 
   return (

@@ -51,10 +51,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   reorder: async (updates) => {
     await window.api.tasks.reorder(updates)
-    for (const u of updates) {
-      set(s => ({
-        tasks: s.tasks.map(t => t.id === u.id ? { ...t, sortOrder: u.sortOrder } : t)
-      }))
-    }
+    const orderMap = new Map(updates.map(u => [u.id, u.sortOrder]))
+    set(s => ({
+      tasks: s.tasks.map(t => orderMap.has(t.id) ? { ...t, sortOrder: orderMap.get(t.id)! } : t)
+    }))
   },
 }))

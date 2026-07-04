@@ -5,6 +5,7 @@ export interface Project {
   color: string
   description: string
   status: 'active' | 'archived' | 'planning' | 'on-hold'
+  taskCount?: number
   createdAt: string
   updatedAt: string
 }

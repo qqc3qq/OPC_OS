@@ -21,10 +21,14 @@ async function createWindow(): Promise<void> {
     },
   })
 
-  const dbPath = join(app.getPath('userData'), 'ceo-os.db')
-  await initDatabase(dbPath)
-  runMigrations()
-  registerAllHandlers()
+  try {
+    const dbPath = join(app.getPath('userData'), 'ceo-os.db')
+    await initDatabase(dbPath)
+    runMigrations()
+    registerAllHandlers()
+  } catch (err) {
+    console.error('Failed to initialize app:', err)
+  }
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()

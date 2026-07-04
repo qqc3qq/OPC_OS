@@ -1,5 +1,5 @@
 import { Database as SqlJsDatabase } from 'sql.js'
-import { fromSnakeCase } from '@ceo-os/shared'
+import { mapRow } from '@ceo-os/shared'
 
 export abstract class BaseRepository<T> {
   constructor(protected db: SqlJsDatabase) {}
@@ -9,8 +9,7 @@ export abstract class BaseRepository<T> {
     if (params) stmt.bind(params)
     const results: T[] = []
     while (stmt.step()) {
-      const row = stmt.getAsObject()
-      results.push(fromSnakeCase(row) as T)
+      results.push(mapRow<T>(stmt.getAsObject() as Record<string, unknown>))
     }
     stmt.free()
     return results
@@ -19,12 +18,13 @@ export abstract class BaseRepository<T> {
   protected queryOne(sql: string, params?: unknown[]): T | undefined {
     const stmt = this.db.prepare(sql)
     if (params) stmt.bind(params)
-    let result: T | undefined
     if (stmt.step()) {
-      result = fromSnakeCase(stmt.getAsObject()) as T
+      const result = mapRow<T>(stmt.getAsObject() as Record<string, unknown>)
+      stmt.free()
+      return result
     }
     stmt.free()
-    return result
+    return undefined
   }
 
   protected count(sql: string, params?: unknown[]): number {

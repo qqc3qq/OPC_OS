@@ -52,7 +52,10 @@ export function NotesPage(): JSX.Element {
 
   useEffect(() => {
     const timer = setInterval(() => { if (isDirty) handleSave() }, 3000)
-    return () => clearInterval(timer)
+    return () => {
+      clearInterval(timer)
+      if (isDirty) handleSave()
+    }
   }, [isDirty, title, content, selectedId])
 
   const selectedNote = notes.find(n => n.id === selectedId)

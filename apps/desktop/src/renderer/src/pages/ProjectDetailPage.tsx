@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useProjectStore } from '../stores/useProjectStore'
 import { useTaskStore } from '../stores/useTaskStore'
+import type { Task } from '@ceo-os/shared'
 import { useGoalStore } from '../stores/useGoalStore'
 import { useNoteStore } from '../stores/useNoteStore'
 import { Button, Tabs, TabsList, TabsTrigger, TabsContent, Card, CardContent, CardHeader, CardTitle, ProjectIcon, LoadingSpinner, Badge } from '@ceo-os/ui'
@@ -19,7 +20,7 @@ export function ProjectDetailPage(): JSX.Element {
   const { notes, fetchNotes, createNote } = useNoteStore()
   const [loaded, setLoaded] = useState(false)
   const [showTaskForm, setShowTaskForm] = useState(false)
-  const [selectedTask, setSelectedTask] = useState(null)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [goalTitle, setGoalTitle] = useState('')
   const [goalDeadline, setGoalDeadline] = useState('')
   const [noteTitle, setNoteTitle] = useState('')

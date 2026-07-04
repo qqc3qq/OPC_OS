@@ -107,12 +107,19 @@ export class TaskRepository extends BaseRepository<Task> {
   }
 
   updateSortOrder(updates: { id: string; sortOrder: number }[]): void {
-    const stmt = this.db.prepare("UPDATE tasks SET sort_order = ?, updated_at = ? WHERE id = ?")
-    const now = nowISO()
-    for (const u of updates) {
-      stmt.run([u.sortOrder, now, u.id])
+    this.db.run('BEGIN TRANSACTION')
+    try {
+      const stmt = this.db.prepare("UPDATE tasks SET sort_order = ?, updated_at = ? WHERE id = ?")
+      const now = nowISO()
+      for (const u of updates) {
+        stmt.run([u.sortOrder, now, u.id])
+      }
+      stmt.free()
+      this.db.run('COMMIT')
+    } catch (e) {
+      this.db.run('ROLLBACK')
+      throw e
     }
-    stmt.free()
   }
 
   delete(id: string): void {
