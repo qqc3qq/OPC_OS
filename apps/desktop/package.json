@@ -2,6 +2,8 @@
   "name": "@ceo-os/desktop",
   "version": "0.0.1",
   "private": true,
+  "description": "AI-powered operating system for solo entrepreneurs",
+  "author": "qqc3qq",
   "type": "module",
   "main": "./out/main/index.js",
   "scripts": {
