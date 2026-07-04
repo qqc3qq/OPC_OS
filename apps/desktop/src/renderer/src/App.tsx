@@ -10,6 +10,7 @@ import { NotesPage } from './pages/NotesPage'
 import { AIPage } from './pages/AIPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { CommandPalette } from './components/command-palette/CommandPalette'
+import { Toast } from './components/shared/Toast'
 
 export function App(): JSX.Element {
   return (
@@ -28,6 +29,7 @@ export function App(): JSX.Element {
           </Routes>
         </AppLayout>
         <CommandPalette />
+        <Toast />
       </BrowserRouter>
     </TooltipProvider>
   )
