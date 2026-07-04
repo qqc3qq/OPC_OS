@@ -19,7 +19,19 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()]
   },
   renderer: {
-    plugins: [react()],
+    plugins: [
+      react(),
+      {
+        name: 'remove-crossorigin',
+        transformIndexHtml(html) {
+          return html.replace(/crossorigin/g, '')
+        }
+      }
+    ],
+    base: './',
+    build: {
+      modulePreload: false
+    },
     resolve: {
       alias: {
         '@': resolve('src/renderer/src')
