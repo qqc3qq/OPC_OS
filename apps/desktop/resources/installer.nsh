@@ -1,7 +1,11 @@
 !macro customInit
-  ExecWait 'taskkill /F /IM "CEO OS.exe"' $0
+  ; Silently kill any running instances before install
+  nsExec::ExecToLog 'taskkill /F /IM "CEO OS.exe"'
+  Sleep 1000
 !macroend
 
 !macro customUnInstall
-  ExecWait 'taskkill /F /IM "CEO OS.exe"' $0
+  ; Silently kill any running instances before uninstall
+  nsExec::ExecToLog 'taskkill /F /IM "CEO OS.exe"'
+  Sleep 1000
 !macroend
