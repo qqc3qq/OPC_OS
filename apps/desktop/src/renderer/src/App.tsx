@@ -14,35 +14,35 @@ import { CommandPalette } from './components/command-palette/CommandPalette'
 import { Toast } from './components/shared/Toast'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 
-function AppRoutes(): JSX.Element {
+function AppInner(): JSX.Element {
   useKeyboardShortcuts()
 
   return (
-    <HashRouter>
-      <AppLayout>
-        <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/projects/:id" element={<ProjectDetailPage />} />
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/notes" element={<NotesPage />} />
-          <Route path="/ai" element={<AIPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-      </AppLayout>
-      <CommandPalette />
-      <Toast />
-    </HashRouter>
+    <AppLayout>
+      <Routes>
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/projects/:id" element={<ProjectDetailPage />} />
+        <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/notes" element={<NotesPage />} />
+        <Route path="/ai" element={<AIPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Routes>
+    </AppLayout>
   )
 }
 
 export function App(): JSX.Element {
   return (
     <ErrorBoundary>
-      <TooltipProvider>
-        <AppRoutes />
-      </TooltipProvider>
+      <HashRouter>
+        <TooltipProvider>
+          <AppInner />
+          <CommandPalette />
+          <Toast />
+        </TooltipProvider>
+      </HashRouter>
     </ErrorBoundary>
   )
 }
