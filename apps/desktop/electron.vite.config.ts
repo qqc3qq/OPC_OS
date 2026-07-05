@@ -35,7 +35,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@': resolve('src/renderer/src')
-      }
+      },
+      dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client']
     }
   }
 })
