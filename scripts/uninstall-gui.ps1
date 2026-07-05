@@ -1,230 +1,120 @@
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+
+# Kill running process first
+try { Get-Process "CEO OS" -ErrorAction Stop | Stop-Process -Force } catch {}
+Start-Sleep -Seconds 1
 
 $home = $env:USERPROFILE
-$appPath = "$home\AppData\Local\Programs\CEO OS"
-$dataPath = "$home\AppData\Roaming\CEO OS"
-$legacyData = "$home\AppData\Roaming\@ceo-os"
-$dbFile = "$home\ceo-os.db"
 
-# Also scan registry for custom install location
-$regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
-$customInstall = Get-ItemProperty $regPath 2>$null | Where-Object { $_.DisplayName -eq "CEO OS" } | Select-Object -First 1
-$regInstallPath = if ($customInstall) { $customInstall.InstallLocation } else { $null }
-
-# Collect all possible paths
-$allPaths = @()
-$allPaths += $appPath
-$allPaths += $dataPath
-$allPaths += $legacyData
-$allPaths += $dbFile
-if ($regInstallPath -and (Test-Path $regInstallPath)) {
-  $allPaths += $regInstallPath
-}
-# Also check D drive and desktop
-$allPaths += "D:\CEO_OS"
-$allPaths += "D:\OPC_OS"
-$allPaths += "C:\Program Files\CEO OS"
-$allPaths += "$home\Desktop\CEO_OS\apps\desktop\dist"
-# Remove duplicates
-$allPaths = $allPaths | Select-Object -Unique
-# Only keep existing paths
-$allPaths = $allPaths | Where-Object { $_ -and (Test-Path $_) }
-
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "CEO OS Uninstaller"
-$form.Size = New-Object System.Drawing.Size(520, 580)
-$form.StartPosition = "CenterScreen"
-$form.FormBorderStyle = "FixedDialog"
-$form.MaximizeBox = $false
-$form.BackColor = [System.Drawing.Color]::FromArgb(0x09, 0x0b, 0x0d)
-$form.ForeColor = [System.Drawing.Color]::White
-$form.Icon = $null
-
-# Header
-$header = New-Object System.Windows.Forms.Panel
-$header.Size = New-Object System.Drawing.Size(480, 80)
-$header.Location = New-Object System.Drawing.Point(20, 20)
-$header.BackColor = [System.Drawing.Color]::FromArgb(0x18, 0x18, 0x1b)
-
-$icon = New-Object System.Windows.Forms.Label
-$icon.Text = "CEO"
-$icon.Font = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
-$icon.ForeColor = [System.Drawing.Color]::FromArgb(0x3b, 0x82, 0xf6)
-$icon.Size = New-Object System.Drawing.Size(60, 30)
-$icon.Location = New-Object System.Drawing.Point(24, 16)
-
-$title = New-Object System.Windows.Forms.Label
-$title.Text = "CEO OS"
-$title.Font = New-Object System.Drawing.Font("Segoe UI", 16, [System.Drawing.FontStyle]::Bold)
-$title.ForeColor = [System.Drawing.Color]::White
-$title.Size = New-Object System.Drawing.Size(200, 30)
-$title.Location = New-Object System.Drawing.Point(80, 14)
-
-$sub = New-Object System.Windows.Forms.Label
-$sub.Text = "Remove CEO OS and all local data from your computer."
-$sub.Font = New-Object System.Drawing.Font("Segoe UI", 9)
-$sub.ForeColor = [System.Drawing.Color]::FromArgb(0xa1, 0xa1, 0xaa)
-$sub.Size = New-Object System.Drawing.Size(380, 20)
-$sub.Location = New-Object System.Drawing.Point(80, 44)
-
-$header.Controls.Add($icon)
-$header.Controls.Add($title)
-$header.Controls.Add($sub)
-
-# File list
-$listBox = New-Object System.Windows.Forms.Panel
-$listBox.Size = New-Object System.Drawing.Size(480, 160)
-$listBox.Location = New-Object System.Drawing.Point(20, 115)
-$listBox.BackColor = [System.Drawing.Color]::FromArgb(0x09, 0x0b, 0x0d)
-$listBox.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-
-$y = 12
-$colors = @("#3b82f6","#10b981","#8b5cf6","#f59e0b","#ec4899","#f97316","#06b6d4")
-$ci = 0
-
-foreach ($p in $allPaths) {
-    $exists = $true
-    $label = if ($p -match "AppData") { "User Data" }
-             elseif ($p -match "Program Files|:\\") { "Installation" }
-             elseif ($p -match "ceo-os\.db") { "Database" }
-             else { "Files" }
-
-    $dot = New-Object System.Windows.Forms.Panel
-    $dot.Size = New-Object System.Drawing.Size(8, 8)
-    $dot.Location = New-Object System.Drawing.Point(20, $y + 6)
-    $c = $colors[$ci % $colors.Length]
-    $dot.BackColor = [System.Drawing.Color]::FromArgb(
-        [Convert]::ToInt32($c.Substring(1,2), 16),
-        [Convert]::ToInt32($c.Substring(3,2), 16),
-        [Convert]::ToInt32($c.Substring(5,2), 16))
-
-    $l1 = New-Object System.Windows.Forms.Label
-    $l1.Text = $label
-    $l1.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-    $l1.ForeColor = [System.Drawing.Color]::White
-    $l1.Size = New-Object System.Drawing.Size(120, 20)
-    $l1.Location = New-Object System.Drawing.Point(40, $y)
-
-    $l2 = New-Object System.Windows.Forms.Label
-    $l2.Text = $p
-    $l2.Font = New-Object System.Drawing.Font("Segoe UI", 8)
-    $l2.ForeColor = [System.Drawing.Color]::FromArgb(0x71, 0x71, 0x7a)
-    $l2.Size = New-Object System.Drawing.Size(420, 16)
-    $l2.Location = New-Object System.Drawing.Point(40, $y + 20)
-
-    $listBox.Controls.Add($dot)
-    $listBox.Controls.Add($l1)
-    $listBox.Controls.Add($l2)
-    $y += 42
-    $ci++
-}
-
-# Progress
-$progress = New-Object System.Windows.Forms.ProgressBar
-$progress.Size = New-Object System.Drawing.Size(480, 6)
-$progress.Location = New-Object System.Drawing.Point(20, 290)
-$progress.Style = "Continuous"
-$progress.ForeColor = [System.Drawing.Color]::FromArgb(0x3b, 0x82, 0xf6)
-$progress.BackColor = [System.Drawing.Color]::FromArgb(0x27, 0x27, 0x2a)
-$progress.Visible = $false
-
-$progressLabel = New-Object System.Windows.Forms.Label
-$progressLabel.Text = ""
-$progressLabel.Font = New-Object System.Drawing.Font("Segoe UI", 8)
-$progressLabel.ForeColor = [System.Drawing.Color]::FromArgb(0xa1, 0xa1, 0xaa)
-$progressLabel.Size = New-Object System.Drawing.Size(480, 16)
-$progressLabel.Location = New-Object System.Drawing.Point(20, 302)
-
-# Status
-$statusLabel = New-Object System.Windows.Forms.Label
-$statusLabel.Text = if ($allPaths.Count -gt 0) { "$($allPaths.Count) item(s) will be removed" } else { "Nothing to remove" }
-$statusLabel.Font = New-Object System.Drawing.Font("Segoe UI", 9)
-$statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(0xa1, 0xa1, 0xaa)
-$statusLabel.Size = New-Object System.Drawing.Size(480, 20)
-$statusLabel.Location = New-Object System.Drawing.Point(20, 325)
-$statusLabel.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
-
-# Buttons
-$cancelBtn = New-Object System.Windows.Forms.Button
-$cancelBtn.Text = "Cancel"
-$cancelBtn.Size = New-Object System.Drawing.Size(235, 40)
-$cancelBtn.Location = New-Object System.Drawing.Point(20, 365)
-$cancelBtn.BackColor = [System.Drawing.Color]::FromArgb(0x27, 0x27, 0x2a)
-$cancelBtn.ForeColor = [System.Drawing.Color]::FromArgb(0xa1, 0xa1, 0xaa)
-$cancelBtn.FlatStyle = "Flat"
-$cancelBtn.FlatAppearance.BorderSize = 0
-$cancelBtn.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-$cancelBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
-$cancelBtn.Add_Click({ $form.Close() })
-
-$uninstallBtn = New-Object System.Windows.Forms.Button
-$uninstallBtn.Text = "Uninstall"
-$uninstallBtn.Size = New-Object System.Drawing.Size(235, 40)
-$uninstallBtn.Location = New-Object System.Drawing.Point(265, 365)
-$uninstallBtn.BackColor = [System.Drawing.Color]::FromArgb(0xef, 0x44, 0x44)
-$uninstallBtn.ForeColor = [System.Drawing.Color]::White
-$uninstallBtn.FlatStyle = "Flat"
-$uninstallBtn.FlatAppearance.BorderSize = 0
-$uninstallBtn.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-$uninstallBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
-$uninstallBtn.Enabled = ($allPaths.Count -gt 0)
-
-$uninstallBtn.Add_Click({
-    $cancelBtn.Enabled = $false
-    $uninstallBtn.Enabled = $false
-    $uninstallBtn.Text = "Uninstalling..."
-    $progress.Visible = $true
-
-    $total = $allPaths.Count
-    $i = 0
-    foreach ($p in $allPaths) {
-        $progressLabel.Text = "Removing: $p"
-        $progress.Value = [Math]::Floor(($i / $total) * 100)
-        Remove-Item -Path $p -Recurse -Force -ErrorAction SilentlyContinue
-        $i++
-        Start-Sleep -Milliseconds 300
+# 1. Find install path from registry (NSIS stores it here)
+$installPaths = @()
+$regPaths = @(
+  "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+  "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+  "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+)
+foreach ($rp in $regPaths) {
+  try {
+    $entries = Get-ItemProperty $rp -ErrorAction SilentlyContinue
+    foreach ($e in $entries) {
+      if ($e.DisplayName -eq "CEO OS" -and $e.InstallLocation) {
+        $installPaths += $e.InstallLocation.TrimEnd('\')
+      }
     }
+  } catch {}
+}
+# Also add known paths
+$installPaths += "$home\AppData\Local\Programs\CEO OS"
+$installPaths += "D:\CEO OS"
+$installPaths += "D:\OPC_OS"
+$installPaths += "C:\Program Files\CEO OS"
+$installPaths = ($installPaths | Select-Object -Unique | Where-Object { $_ -and (Test-Path $_) })
 
-    $progress.Value = 100
-    $progressLabel.Text = ""
-    $statusLabel.Text = "CEO OS has been uninstalled successfully."
-    $statusLabel.ForeColor = [System.Drawing.Color]::FromArgb(0x10, 0xb9, 0x81)
+# 2. Data paths
+$dataPaths = @(
+  "$home\AppData\Roaming\CEO OS",
+  "$home\AppData\Roaming\@ceo-os",
+  "$home\AppData\Roaming\@ceo-os\desktop",
+  "$home\ceo-os.db"
+)
+$dataPaths = ($dataPaths | Select-Object -Unique | Where-Object { $_ -and (Test-Path $_) })
 
-    $okBtn = New-Object System.Windows.Forms.Button
-    $okBtn.Text = "Close"
-    $okBtn.Size = New-Object System.Drawing.Size(480, 40)
-    $okBtn.Location = New-Object System.Drawing.Point(20, 365)
-    $okBtn.BackColor = [System.Drawing.Color]::FromArgb(0x3b, 0x82, 0xf6)
-    $okBtn.ForeColor = [System.Drawing.Color]::White
-    $okBtn.FlatStyle = "Flat"
-    $okBtn.FlatAppearance.BorderSize = 0
-    $okBtn.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
-    $okBtn.Cursor = [System.Windows.Forms.Cursors]::Hand
-    $okBtn.Add_Click({ $form.Close() })
-    $cancelBtn.Visible = $false
-    $uninstallBtn.Visible = $false
-    $form.Controls.Add($okBtn)
+# 3. Temp logs
+$tempPaths = @("$env:TEMP\ceo-os-logs")
+$tempPaths = ($tempPaths | Where-Object { $_ -and (Test-Path $_) })
+
+# Combine
+$allPaths = @($installPaths + $dataPaths + $tempPaths)
+
+if ($allPaths.Count -eq 0) {
+  [System.Windows.Forms.MessageBox]::Show("No CEO OS installation found.", "CEO OS Uninstaller", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+  exit
+}
+
+# GUI
+$f = New-Object System.Windows.Forms.Form
+$f.Text = "CEO OS Uninstaller"; $f.Size = New-Object System.Drawing.Size(540, 500)
+$f.StartPosition = "CenterScreen"; $f.FormBorderStyle = "FixedDialog"; $f.MaximizeBox = $false
+$f.BackColor = [System.Drawing.Color]::FromArgb(0x0f, 0x0f, 0x11); $f.ForeColor = [System.Drawing.Color]::White
+
+$head = New-Object System.Windows.Forms.Panel; $head.Size = New-Object System.Drawing.Size(500, 70); $head.Location = New-Object System.Drawing.Point(18, 15)
+$head.BackColor = [System.Drawing.Color]::FromArgb(0x1a, 0x1a, 0x1d)
+$tl = New-Object System.Windows.Forms.Label; $tl.Text = "CEO OS Uninstaller"; $tl.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
+$tl.ForeColor = [System.Drawing.Color]::White; $tl.Size = New-Object System.Drawing.Size(460, 28); $tl.Location = New-Object System.Drawing.Point(20, 10)
+$sl = New-Object System.Windows.Forms.Label; $sl.Text = "$($allPaths.Count) location(s) found — all files and data will be removed."
+$sl.Font = New-Object System.Drawing.Font("Segoe UI", 9); $sl.ForeColor = [System.Drawing.Color]::FromArgb(0x8b, 0x8b, 0x95)
+$sl.Size = New-Object System.Drawing.Size(460, 20); $sl.Location = New-Object System.Drawing.Point(20, 38)
+$head.Controls.Add($tl); $head.Controls.Add($sl)
+
+$list = New-Object System.Windows.Forms.ListBox; $list.Size = New-Object System.Drawing.Size(500, 220); $list.Location = New-Object System.Drawing.Point(18, 95)
+$list.BackColor = [System.Drawing.Color]::FromArgb(0x0c, 0x0c, 0x0e); $list.ForeColor = [System.Drawing.Color]::FromArgb(0xa0, 0xa0, 0xaa)
+$list.BorderStyle = "None"; $list.Font = New-Object System.Drawing.Font("Consolas", 9)
+foreach ($p in $allPaths) {
+  $cat = if ($p -match "AppData") { "DATA " } elseif ($p -match "Temp") { "TEMP " } else { "APP  " }
+  $list.Items.Add("  [$cat] $p")
+}
+
+$pb = New-Object System.Windows.Forms.ProgressBar; $pb.Size = New-Object System.Drawing.Size(500, 4); $pb.Location = New-Object System.Drawing.Point(18, 330)
+$pb.Style = "Continuous"; $pb.ForeColor = [System.Drawing.Color]::FromArgb(0x3b, 0x82, 0xf6); $pb.Visible = $false
+$pl = New-Object System.Windows.Forms.Label; $pl.Size = New-Object System.Drawing.Size(500, 16); $pl.Location = New-Object System.Drawing.Point(18, 340)
+$pl.Font = New-Object System.Drawing.Font("Segoe UI", 8); $pl.ForeColor = [System.Drawing.Color]::FromArgb(0x8b, 0x8b, 0x95)
+
+$st = New-Object System.Windows.Forms.Label; $st.Text = "Click Uninstall to begin."
+$st.Size = New-Object System.Drawing.Size(500, 20); $st.Location = New-Object System.Drawing.Point(18, 360)
+$st.Font = New-Object System.Drawing.Font("Segoe UI", 9); $st.ForeColor = [System.Drawing.Color]::FromArgb(0x8b, 0x8b, 0x95); $st.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+
+$cb = New-Object System.Windows.Forms.Button; $cb.Text = "Cancel"; $cb.Size = New-Object System.Drawing.Size(245, 38); $cb.Location = New-Object System.Drawing.Point(18, 395)
+$cb.BackColor = [System.Drawing.Color]::FromArgb(0x25, 0x25, 0x28); $cb.ForeColor = [System.Drawing.Color]::FromArgb(0x8b, 0x8b, 0x95); $cb.FlatStyle = "Flat"; $cb.FlatAppearance.BorderSize = 0; $cb.Font = New-Object System.Drawing.Font("Segoe UI", 10)
+$cb.Add_Click({ $f.Close() })
+
+$ub = New-Object System.Windows.Forms.Button; $ub.Text = "Uninstall"; $ub.Size = New-Object System.Drawing.Size(245, 38); $ub.Location = New-Object System.Drawing.Point(273, 395)
+$ub.BackColor = [System.Drawing.Color]::FromArgb(0xdc, 0x26, 0x26); $ub.ForeColor = [System.Drawing.Color]::White; $ub.FlatStyle = "Flat"; $ub.FlatAppearance.BorderSize = 0; $ub.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
+$ub.Add_Click({
+  $cb.Enabled = $false; $ub.Enabled = $false; $pb.Visible = $true
+  $total = $allPaths.Count; $done = 0
+  foreach ($p in $allPaths) {
+    $pl.Text = "Removing: $p"
+    $pb.Value = [Math]::Floor(($done / $total) * 100)
+    try { Remove-Item -Path $p -Recurse -Force -ErrorAction Stop } catch { $pl.Text = "Skipping: $p (in use)" }
+    $done++; Start-Sleep -Milliseconds 200
+  }
+  # Remove registry entries
+  foreach ($rp in $regPaths) {
+    try {
+      $entries = Get-ItemProperty $rp -ErrorAction SilentlyContinue
+      foreach ($e in $entries) {
+        if ($e.PSChildName -and $e.DisplayName -eq "CEO OS") {
+          Remove-Item -Path "$($rp.TrimEnd('*'))$($e.PSChildName)" -Force -ErrorAction SilentlyContinue
+        }
+      }
+    } catch {}
+  }
+  $pb.Value = 100; $pl.Text = ""; $st.Text = "CEO OS has been completely uninstalled."
+  $st.ForeColor = [System.Drawing.Color]::FromArgb(0x10, 0xb9, 0x81)
+  $ok = New-Object System.Windows.Forms.Button; $ok.Text = "Done"; $ok.Size = New-Object System.Drawing.Size(500, 38); $ok.Location = New-Object System.Drawing.Point(18, 395)
+  $ok.BackColor = [System.Drawing.Color]::FromArgb(0x3b, 0x82, 0xf6); $ok.ForeColor = [System.Drawing.Color]::White; $ok.FlatStyle = "Flat"; $ok.FlatAppearance.BorderSize = 0; $ok.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold); $ok.Add_Click({ $f.Close() })
+  $cb.Visible = $false; $ub.Visible = $false; $f.Controls.Add($ok)
 })
 
-# Close button hover effects
-$cancelBtn.Add_MouseEnter({
-    $cancelBtn.BackColor = [System.Drawing.Color]::FromArgb(0x3f, 0x3f, 0x46)
-    $cancelBtn.ForeColor = [System.Drawing.Color]::White
-})
-$cancelBtn.Add_MouseLeave({
-    $cancelBtn.BackColor = [System.Drawing.Color]::FromArgb(0x27, 0x27, 0x2a)
-    $cancelBtn.ForeColor = [System.Drawing.Color]::FromArgb(0xa1, 0xa1, 0xaa)
-})
-$uninstallBtn.Add_MouseEnter({ $uninstallBtn.BackColor = [System.Drawing.Color]::FromArgb(0xdc, 0x26, 0x26) })
-$uninstallBtn.Add_MouseLeave({ $uninstallBtn.BackColor = [System.Drawing.Color]::FromArgb(0xef, 0x44, 0x44) })
-
-$form.Controls.Add($header)
-$form.Controls.Add($listBox)
-$form.Controls.Add($progress)
-$form.Controls.Add($progressLabel)
-$form.Controls.Add($statusLabel)
-$form.Controls.Add($cancelBtn)
-$form.Controls.Add($uninstallBtn)
-
-[void] $form.ShowDialog()
+$f.Controls.Add($head); $f.Controls.Add($list); $f.Controls.Add($pb); $f.Controls.Add($pl); $f.Controls.Add($st); $f.Controls.Add($cb); $f.Controls.Add($ub)
+[void] $f.ShowDialog()
