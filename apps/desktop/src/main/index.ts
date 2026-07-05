@@ -6,23 +6,19 @@ import { registerAllHandlers } from './ipc'
 
 app.setName('CEO OS')
 
-const LOG_DIR = app.getPath('userData')
-const LOG = join(LOG_DIR, 'app.log')
-
 function log(msg: string) {
   try {
-    if (!existsSync(LOG_DIR)) mkdirSync(LOG_DIR, { recursive: true })
-    writeFileSync(LOG, msg + '\n', { flag: 'a' })
+    const d = app.getPath('userData')
+    if (!existsSync(d)) mkdirSync(d, { recursive: true })
+    writeFileSync(join(d, 'app.log'), msg + '\n', { flag: 'a' })
   } catch {}
 }
 
-log('=== CEO OS v0.0.2 ===')
 process.on('uncaughtException', (err) => log('[FATAL] ' + err.message + '\n' + (err.stack || '')))
 
 let mainWindow: BrowserWindow | null = null
 
 async function createWindow(): Promise<void> {
-  log('[init] start')
   mainWindow = new BrowserWindow({
     width: 1400, height: 900,
     minWidth: 1024, minHeight: 680,
@@ -37,13 +33,11 @@ async function createWindow(): Promise<void> {
   })
 
   try {
-    log('[db] path=' + join(app.getPath('userData'), 'ceo-os.db'))
     await initDatabase(join(app.getPath('userData'), 'ceo-os.db'))
     runMigrations()
     registerAllHandlers()
-    log('[db] OK')
   } catch (err: any) {
-    log('[db] FAIL: ' + err.message)
+    log('[ERROR] ' + err.message)
   }
 
   mainWindow.on('ready-to-show', () => mainWindow?.show())
