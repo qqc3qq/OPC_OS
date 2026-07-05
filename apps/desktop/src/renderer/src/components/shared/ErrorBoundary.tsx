@@ -15,7 +15,9 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
   }
 
   componentDidCatch(error: Error, info: { componentStack: string }) {
-    console.error('ErrorBoundary caught:', error, info)
+    try {
+      window.api?.system?.writeErrorLog('[ErrorBoundary] ' + error.message + '\n' + error.stack + '\n' + info.componentStack)
+    } catch {}
   }
 
   render() {
