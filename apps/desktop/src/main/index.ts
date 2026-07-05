@@ -1,10 +1,11 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 import { join } from 'path'
 import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { initDatabase, runMigrations, saveDatabase, closeDatabase } from '@ceo-os/database'
 import { registerAllHandlers } from './ipc'
 
 app.setName('CEO OS')
+Menu.setApplicationMenu(null)
 
 // Guaranteed writable: system temp + app-specific subfolder
 const LOG_DIR = join(process.env.TEMP || 'C:\\Windows\\Temp', 'ceo-os-logs')
