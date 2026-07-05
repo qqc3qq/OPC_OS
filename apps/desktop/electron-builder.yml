@@ -6,12 +6,8 @@ directories:
 files:
   - out/**/*
   - node_modules/sql.js/**/*
-  - node_modules/electron-updater/**/*
-  - node_modules/builder-util-runtime/**/*
 asarUnpack:
   - node_modules/sql.js/**/*
-  - node_modules/electron-updater/**/*
-  - node_modules/builder-util-runtime/**/*
 win:
   target:
     - target: nsis
@@ -21,7 +17,3 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   include: resources/installer.nsh
-publish:
-  provider: github
-  owner: qqc3qq
-  repo: OPC_OS

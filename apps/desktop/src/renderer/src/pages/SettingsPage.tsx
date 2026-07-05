@@ -11,8 +11,6 @@ export function SettingsPage(): JSX.Element {
   const toggleTheme = useUIStore(s => s.toggleTheme)
   const [apiKey, setApiKey] = useState('')
   const [saved, setSaved] = useState(false)
-  const [updateStatus, setUpdateStatus] = useState('')
-
   useEffect(() => {
     setApiKey(localStorage.getItem('ceo-os-openai-key') || '')
   }, [])
@@ -21,22 +19,6 @@ export function SettingsPage(): JSX.Element {
     localStorage.setItem('ceo-os-openai-key', apiKey)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
-  }
-
-  async function checkUpdate() {
-    setUpdateStatus('checking')
-    try {
-      const res = await fetch('https://api.github.com/repos/qqc3qq/OPC_OS/releases/latest')
-      const data = await res.json()
-      const latest = data.tag_name || ''
-      if (latest && latest !== 'v0.0.1') {
-        setUpdateStatus('available: ' + latest)
-      } else {
-        setUpdateStatus('uptodate')
-      }
-    } catch {
-      setUpdateStatus('error')
-    }
   }
 
   return (
@@ -100,8 +82,9 @@ export function SettingsPage(): JSX.Element {
             </div>
             <Separator />
             <div>
-              <Button variant="secondary" size="sm" onClick={checkUpdate}>
-                {updateStatus === 'checking' ? '...' : updateStatus === 'uptodate' ? 'Up to date' : updateStatus.startsWith('available') ? updateStatus : 'Check for Updates'}
+              <p className="text-xs text-muted-foreground mb-2">{t('settings.db.save')}</p>
+              <Button variant="secondary" size="sm" onClick={() => window.api.system.saveDatabase()}>
+                {t('settings.db.save')}
               </Button>
             </div>
           </CardContent>
