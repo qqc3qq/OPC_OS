@@ -4,63 +4,66 @@ import {
   StickyNote, Bot, Settings, Zap
 } from 'lucide-react'
 import { cn } from '@ceo-os/ui'
+import { useI18n } from '../../i18n'
 
 const NAV_ITEMS = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/projects', icon: FolderKanban, label: 'Projects' },
-  { to: '/tasks', icon: CheckSquare, label: 'Tasks' },
-  { to: '/calendar', icon: Calendar, label: 'Calendar' },
-  { to: '/notes', icon: StickyNote, label: 'Notes' },
-  { to: '/ai', icon: Bot, label: 'AI Assistant' },
+  { to: '/', icon: LayoutDashboard, label: 'menu.dashboard' },
+  { to: '/projects', icon: FolderKanban, label: 'menu.projects' },
+  { to: '/tasks', icon: CheckSquare, label: 'menu.tasks' },
+  { to: '/calendar', icon: Calendar, label: 'menu.calendar' },
+  { to: '/notes', icon: StickyNote, label: 'menu.notes' },
+  { to: '/ai', icon: Bot, label: 'menu.ai' },
 ]
 
 const BOTTOM_ITEMS = [
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/settings', icon: Settings, label: 'menu.settings' },
 ]
 
 export function Sidebar(): JSX.Element {
+  const { t } = useI18n()
+
   return (
-    <div className="w-56 border-r border-border bg-card/50 backdrop-blur-sm flex flex-col shrink-0">
+    <div className="w-56 border-r border-border bg-card/30 flex flex-col shrink-0">
       <div className="h-12 border-b border-border flex items-center px-4 gap-2">
-        <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
+        <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
           <Zap className="h-4 w-4 text-white" />
         </div>
-        <span className="font-semibold text-sm">CEO OS</span>
+        <span className="font-semibold text-sm">{t('app.name')}</span>
       </div>
 
-      <nav className="flex-1 py-3 px-2 space-y-1">
+      <nav className="flex-1 py-3 px-2 space-y-0.5">
         {NAV_ITEMS.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === '/'}
             className={({ isActive }) => cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors',
               isActive
-                ? 'bg-primary/10 text-primary font-medium'
-                : 'text-zinc-400 hover:text-foreground hover:bg-card'
+                ? 'bg-secondary/50 text-foreground font-medium'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/30'
             )}
           >
             <item.icon className="h-4 w-4" />
-            {item.label}
+            {t(item.label)}
           </NavLink>
         ))}
       </nav>
 
-      <div className="py-3 px-2 space-y-1 border-t border-border">
+      <div className="py-3 px-2 space-y-0.5 border-t border-border">
         {BOTTOM_ITEMS.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) => cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors',
               isActive
-                ? 'bg-primary/10 text-primary font-medium'
-                : 'text-zinc-400 hover:text-foreground hover:bg-card'
+                ? 'bg-secondary/50 text-foreground font-medium'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/30'
             )}
           >
             <item.icon className="h-4 w-4" />
-            {item.label}
+            {t(item.label)}
           </NavLink>
         ))}
       </div>

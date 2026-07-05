@@ -17,3 +17,7 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   include: resources/installer.nsh
+publish:
+  provider: github
+  owner: qqc3qq
+  repo: OPC_OS

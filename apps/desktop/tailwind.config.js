@@ -30,7 +30,12 @@ export default {
         danger: {
           DEFAULT: 'hsl(var(--danger))',
           foreground: 'hsl(var(--danger-foreground))'
-        }
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))'
+        },
+        'muted-foreground': 'hsl(var(--muted-foreground))'
       },
       borderRadius: {
         lg: 'var(--radius)',

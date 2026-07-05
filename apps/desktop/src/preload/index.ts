@@ -50,6 +50,10 @@ const api = {
     getPlatform: () => ipcRenderer.invoke('system:getPlatform'),
     saveDatabase: () => ipcRenderer.invoke('system:saveDatabase'),
     writeErrorLog: (text: string) => ipcRenderer.invoke('system:writeErrorLog', text),
+    checkUpdate: () => ipcRenderer.invoke('system:checkUpdate'),
+    downloadUpdate: () => ipcRenderer.invoke('system:downloadUpdate'),
+    installUpdate: () => ipcRenderer.invoke('system:installUpdate'),
+    onUpdateReady: (cb: () => void) => ipcRenderer.on('update:ready', cb),
   },
 }
 

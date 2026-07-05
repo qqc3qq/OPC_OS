@@ -13,6 +13,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import { CommandPalette } from './components/command-palette/CommandPalette'
 import { Toast } from './components/shared/Toast'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { I18nProvider } from './i18n'
 
 function AppInner(): JSX.Element {
   useKeyboardShortcuts()
@@ -36,13 +37,15 @@ function AppInner(): JSX.Element {
 export function App(): JSX.Element {
   return (
     <ErrorBoundary>
-      <HashRouter>
-        <TooltipProvider>
-          <AppInner />
-          <CommandPalette />
-          <Toast />
-        </TooltipProvider>
-      </HashRouter>
+      <I18nProvider>
+        <HashRouter>
+          <TooltipProvider>
+            <AppInner />
+            <CommandPalette />
+            <Toast />
+          </TooltipProvider>
+        </HashRouter>
+      </I18nProvider>
     </ErrorBoundary>
   )
 }

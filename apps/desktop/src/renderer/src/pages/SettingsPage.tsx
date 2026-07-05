@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react'
 import { PageHeader, Card, CardContent, CardHeader, CardTitle, Button, Input, Separator } from '@ceo-os/ui'
 import { useUIStore } from '../stores/useUIStore'
+import { useI18n } from '../i18n'
 import { SeedData } from '../components/settings/SeedData'
+import { Globe, Moon, Sun } from 'lucide-react'
 
 export function SettingsPage(): JSX.Element {
+  const { t, lang, setLang } = useI18n()
   const theme = useUIStore(s => s.theme)
   const toggleTheme = useUIStore(s => s.toggleTheme)
   const [apiKey, setApiKey] = useState('')
   const [saved, setSaved] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState('')
 
   useEffect(() => {
     setApiKey(localStorage.getItem('ceo-os-openai-key') || '')
@@ -19,25 +23,66 @@ export function SettingsPage(): JSX.Element {
     setTimeout(() => setSaved(false), 2000)
   }
 
+  async function checkUpdate() {
+    setUpdateStatus('checking')
+    try {
+      const res = await fetch('https://api.github.com/repos/qqc3qq/OPC_OS/releases/latest')
+      const data = await res.json()
+      const latest = data.tag_name || ''
+      if (latest && latest !== 'v0.0.1') {
+        setUpdateStatus('available: ' + latest)
+      } else {
+        setUpdateStatus('uptodate')
+      }
+    } catch {
+      setUpdateStatus('error')
+    }
+  }
+
   return (
     <div className="max-w-2xl">
-      <PageHeader title="Settings" description="Configure your workspace" />
+      <PageHeader title={t('settings.title')} description={t('settings.about.text')} />
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Card>
-          <CardHeader><CardTitle className="text-base">AI Configuration</CardTitle></CardHeader>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">{t('settings.ai')}</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-3">
-            <div>
-              <label className="text-sm text-zinc-400 block mb-1">OpenAI API Key</label>
-              <div className="flex gap-2">
-                <Input
-                  type="password"
-                  value={apiKey}
-                  onChange={e => { setApiKey(e.target.value); setSaved(false) }}
-                  placeholder="sk-..."
-                />
-                <Button size="sm" onClick={handleSaveKey}>
-                  {saved ? 'Saved' : 'Save'}
+            <label className="text-xs text-muted-foreground">{t('settings.apiKey')}</label>
+            <div className="flex gap-2">
+              <Input type="password" value={apiKey} onChange={e => { setApiKey(e.target.value); setSaved(false) }} placeholder={t('settings.apiKey.placeholder')} />
+              <Button size="sm" onClick={handleSaveKey}>{saved ? t('settings.saved') : t('settings.save')}</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">{t('settings.appearance')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {theme === 'dark' ? <Moon className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-muted-foreground" />}
+                <span className="text-sm">{t('settings.theme')}</span>
+              </div>
+              <Button variant="secondary" size="sm" onClick={toggleTheme}>
+                {theme === 'dark' ? t('settings.theme.dark') : t('settings.theme.light')}
+              </Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{t('settings.language')}</span>
+              </div>
+              <div className="flex gap-1">
+                <Button variant={lang === 'zh' ? 'default' : 'secondary'} size="sm" onClick={() => setLang('zh')}>
+                  {t('settings.language.zh')}
+                </Button>
+                <Button variant={lang === 'en' ? 'default' : 'secondary'} size="sm" onClick={() => setLang('en')}>
+                  {t('settings.language.en')}
                 </Button>
               </div>
             </div>
@@ -45,38 +90,20 @@ export function SettingsPage(): JSX.Element {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Appearance</CardTitle></CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Theme</span>
-              <Button variant="outline" size="sm" onClick={toggleTheme}>
-                {theme === 'dark' ? 'Dark' : 'Light'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">Data</CardTitle></CardHeader>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">{t('settings.data')}</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-zinc-400 mb-2">Load sample data to explore the app.</p>
+              <p className="text-xs text-muted-foreground mb-2">{t('settings.about.text')}</p>
               <SeedData />
             </div>
             <Separator />
             <div>
-              <p className="text-sm text-zinc-400 mb-2">Save database to disk.</p>
-              <Button variant="outline" size="sm" onClick={() => window.api.system.saveDatabase()}>
-                Save Database
+              <Button variant="secondary" size="sm" onClick={checkUpdate}>
+                {updateStatus === 'checking' ? '...' : updateStatus === 'uptodate' ? 'Up to date' : updateStatus.startsWith('available') ? updateStatus : 'Check for Updates'}
               </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">About</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm text-zinc-400">CEO OS v0.0.1 - AI-powered operating system for solo entrepreneurs</p>
           </CardContent>
         </Card>
       </div>
