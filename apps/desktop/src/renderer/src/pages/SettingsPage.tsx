@@ -16,7 +16,7 @@ export function SettingsPage(): JSX.Element {
 
   useEffect(() => {
     setApiKey(localStorage.getItem('ceo-os-openai-key') || '')
-    const unsub = window.api.system.onUpdateReady(() => setUpdateMsg('ready'))
+    const unsub = window.api.system?.onUpdateReady?.(() => setUpdateMsg('ready'))
     return unsub
   }, [])
 
@@ -25,6 +25,18 @@ export function SettingsPage(): JSX.Element {
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
+
+  const checkUpdate = useCallback(async () => {
+    setUpdating(true); setUpdateMsg('checking')
+    try { const v = await window.api.system?.checkUpdate?.(); setUpdateMsg(v ? 'found: ' + v : 'latest') } catch { setUpdateMsg('error') }
+    setUpdating(false)
+  }, [])
+
+  const installUpdate = useCallback(async () => {
+    setUpdating(true); setUpdateMsg('downloading')
+    try { await window.api.system?.downloadUpdate?.() } catch { setUpdateMsg('error') }
+    setUpdating(false)
+  }, [])
 
   return (
     <div className="max-w-2xl">
