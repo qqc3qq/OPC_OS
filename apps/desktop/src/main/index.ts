@@ -1,31 +1,35 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
-import { writeFileSync } from 'fs'
-import { homedir } from 'os'
+import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { initDatabase, runMigrations, saveDatabase, closeDatabase } from '@ceo-os/database'
 import { registerAllHandlers } from './ipc'
 
 app.setName('CEO OS')
 
-const LOG = join(homedir(), 'Desktop', 'ceo-os.log')
+// Guaranteed writable: system temp + app-specific subfolder
+const LOG_DIR = join(process.env.TEMP || 'C:\\Windows\\Temp', 'ceo-os-logs')
+const LOG = join(LOG_DIR, 'app.log')
 
 function log(msg: string) {
-  try { writeFileSync(LOG, msg + '\n', { flag: 'a' }) } catch {}
+  try {
+    if (!existsSync(LOG_DIR)) mkdirSync(LOG_DIR, { recursive: true })
+    writeFileSync(LOG, msg + '\n', { flag: 'a' })
+  } catch {}
 }
 
-log('=== CEO OS v0.0.4 ===')
-log('Install: ' + dirname(dirname(app.getAppPath())))
-log('userData: ' + app.getPath('userData'))
-log('Platform: ' + process.platform + ' Node: ' + process.version)
+log('=== CEO OS v0.0.5 ===')
+log('temp: ' + (process.env.TEMP || 'n/a'))
+log('resourcesPath: ' + (process.resourcesPath || 'n/a'))
+log('platform: ' + process.platform + ' node: ' + process.version)
 
 process.on('uncaughtException', (err) => {
-  log('[MAIN FATAL] ' + err.message + '\n' + (err.stack || ''))
+  log('[FATAL] ' + err.message + '\n' + (err.stack || ''))
 })
 
 let mainWindow: BrowserWindow | null = null
 
 async function createWindow(): Promise<void> {
-  log('[main] creating window')
+  log('[main] createWindow start')
   mainWindow = new BrowserWindow({
     width: 1400, height: 900,
     minWidth: 1024, minHeight: 680,
@@ -46,9 +50,9 @@ async function createWindow(): Promise<void> {
     await initDatabase(dbPath)
     runMigrations()
     registerAllHandlers()
-    log('[main] db ok, ipc registered')
+    log('[main] init OK')
   } catch (err: any) {
-    log('[main DB ERROR] ' + err.message + '\n' + (err.stack || ''))
+    log('[main DB FAIL] ' + err.message + '\n' + (err.stack || ''))
   }
 
   mainWindow.on('ready-to-show', () => { mainWindow?.show(); log('[main] shown') })
@@ -62,7 +66,7 @@ async function createWindow(): Promise<void> {
   }
 }
 
-app.whenReady().then(() => { log('[main] app ready'); createWindow() })
+app.whenReady().then(() => { log('[main] ready'); createWindow() })
 app.on('window-all-closed', () => { closeDatabase(); if (process.platform !== 'darwin') app.quit() })
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow() })
 app.on('before-quit', () => saveDatabase())
