@@ -10,8 +10,13 @@ export function registerSystemHandlers(): void {
   ipcMain.handle('system:saveDatabase', () => { saveDatabase() })
   ipcMain.handle('system:writeErrorLog', (_e, text: string) => {
     try {
-      const logPath = join(app.getPath('userData'), 'error.log')
-      writeFileSync(logPath, text, 'utf-8')
+      const { dirname } = require('path')
+      const { mkdirSync, existsSync } = require('fs')
+      const installRoot = dirname(dirname(app.getAppPath()))
+      const logDir = join(installRoot, 'logs')
+      if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true })
+      const logPath = join(logDir, 'app.log')
+      writeFileSync(logPath, '[RENDERER] ' + text + '\n', { flag: 'a' })
       return logPath
     } catch {
       return null
