@@ -6,27 +6,24 @@ import { registerAllHandlers } from './ipc'
 
 app.setName('CEO OS')
 
-// Find install directory for logging
-let LOG_DIR = ''
-function getLogDir(): string {
-  if (LOG_DIR) return LOG_DIR
-  const candidates = [
-    dirname(dirname(app.getAppPath())),              // packaged: app.asar -> resources -> install root
-    dirname(process.resourcesPath || ''),             // fallback: resources -> install root
-    app.getPath('userData'),                          // fallback: %APPDATA%/CEO OS
-  ]
-  for (const d of candidates) {
-    if (d && d.length > 2) { LOG_DIR = join(d, 'logs'); break }
-  }
-  if (!existsSync(LOG_DIR)) mkdirSync(LOG_DIR, { recursive: true })
-  return LOG_DIR
-}
+// Log to install dir (resourcesPath is available before app is ready)
+const LOG_DIR = join(
+  dirname(process.resourcesPath || app.getPath('userData')),
+  'logs'
+)
+try { if (!existsSync(LOG_DIR)) mkdirSync(LOG_DIR, { recursive: true }) } catch {}
 
 function log(msg: string) {
   try {
-    const logPath = join(getLogDir(), 'app.log')
-    writeFileSync(logPath, msg + '\n', { flag: 'a' })
-  } catch {}
+    writeFileSync(join(LOG_DIR, 'app.log'), msg + '\n', { flag: 'a' })
+  } catch {
+    // Last resort: userData
+    try {
+      const d = join(app.getPath('userData'), 'logs')
+      if (!existsSync(d)) mkdirSync(d, { recursive: true })
+      writeFileSync(join(d, 'app.log'), msg + '\n', { flag: 'a' })
+    } catch {}
+  }
 }
 
 log('=== CEO OS v0.0.4 ===')
