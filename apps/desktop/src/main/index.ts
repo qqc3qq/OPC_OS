@@ -4,11 +4,11 @@ import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { initDatabase, runMigrations, saveDatabase, closeDatabase } from '@ceo-os/database'
 import { registerAllHandlers } from './ipc'
 
-const logPath = join(app.getPath('temp'), 'ceo-os.log')
-
 function log(msg: string) {
   try {
-    writeFileSync(logPath, msg + '\n', { flag: 'a' })
+    const d = join(app.getPath('userData'), 'logs')
+    if (!existsSync(d)) mkdirSync(d, { recursive: true })
+    writeFileSync(join(d, 'app.log'), msg + '\n', { flag: 'a' })
   } catch {}
 }
 
