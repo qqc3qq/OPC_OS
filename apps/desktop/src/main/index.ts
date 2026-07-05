@@ -4,9 +4,11 @@ import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { initDatabase, runMigrations, saveDatabase, closeDatabase } from '@ceo-os/database'
 import { registerAllHandlers } from './ipc'
 
+import { homedir } from 'os'
+
 function logToFile(msg: string) {
   try {
-    const dir = app.getPath('userData')
+    const dir = join(homedir(), 'Desktop', 'CEO_OS')
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
     writeFileSync(join(dir, 'ceo-os.log'), msg + '\n', { flag: 'a' })
   } catch {}
