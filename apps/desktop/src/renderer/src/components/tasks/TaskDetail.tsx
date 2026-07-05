@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import type { Task, Project, TaskPriority, TaskStatus } from '@ceo-os/shared'
-import { PRIORITIES, TASK_STATUSES, PRIORITY_LABELS, STATUS_LABELS } from '@ceo-os/shared'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, Button, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from '@ceo-os/ui'
+import { PRIORITIES, TASK_STATUSES } from '@ceo-os/shared'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, Button, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@ceo-os/ui'
 import { Trash2 } from 'lucide-react'
 import { useTaskStore } from '../../stores/useTaskStore'
+import { useI18n } from '../../i18n'
 import { toast } from '../../lib/toast'
+
+const P_KEYS: Record<string, string> = { urgent: 'priority.urgent', high: 'priority.high', medium: 'priority.medium', low: 'priority.low', none: 'priority.none' }
+const S_KEYS: Record<string, string> = { 'todo': 'status.todo', 'in-progress': 'status.inProgress', 'blocked': 'status.blocked', 'done': 'status.done' }
 
 interface TaskDetailProps {
   task: Task | null
@@ -13,6 +17,7 @@ interface TaskDetailProps {
 }
 
 export function TaskDetail({ task, onClose, projects }: TaskDetailProps): JSX.Element {
+  const { t } = useI18n()
   const updateTask = useTaskStore(s => s.updateTask)
   const deleteTask = useTaskStore(s => s.deleteTask)
   const [title, setTitle] = useState('')
@@ -37,13 +42,13 @@ export function TaskDetail({ task, onClose, projects }: TaskDetailProps): JSX.El
 
   async function handleSave() {
     await updateTask(task!.id, { title, description, priority, status, projectId, dueDate: dueDate || null })
-    toast('Task updated')
+    toast(t('tasks.updated'))
   }
 
   async function handleDelete() {
     await deleteTask(task!.id)
     onClose()
-    toast('Task deleted')
+    toast(t('tasks.deleted'))
   }
 
   const project = projectId ? projects.find(p => p.id === projectId) : null
@@ -52,7 +57,7 @@ export function TaskDetail({ task, onClose, projects }: TaskDetailProps): JSX.El
     <Sheet open={!!task} onOpenChange={onClose}>
       <SheetContent className="w-[480px] sm:max-w-[480px]">
         <SheetHeader>
-          <SheetTitle>Task Detail</SheetTitle>
+          <SheetTitle>{t('tasks.detail')}</SheetTitle>
           <SheetDescription>Created {new Date(task.createdAt).toLocaleDateString()}</SheetDescription>
         </SheetHeader>
         <div className="space-y-4 mt-6">
@@ -60,29 +65,29 @@ export function TaskDetail({ task, onClose, projects }: TaskDetailProps): JSX.El
           <Textarea value={description} onChange={e => setDescription(e.target.value)} onBlur={handleSave} placeholder="Add a description..." rows={4} />
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs text-zinc-500">Status</label>
+              <label className="text-xs text-muted-foreground">{t('tasks.status')}</label>
               <Select value={status} onValueChange={v => { setStatus(v as TaskStatus); handleSave() }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {TASK_STATUSES.map(s => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+                  {TASK_STATUSES.map(s => <SelectItem key={s} value={s}>{t(S_KEYS[s])}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-zinc-500">Priority</label>
+              <label className="text-xs text-muted-foreground">{t('tasks.priority')}</label>
               <Select value={priority} onValueChange={v => { setPriority(v as TaskPriority); handleSave() }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {PRIORITIES.map(p => <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>)}
+                  {PRIORITIES.map(p => <SelectItem key={p} value={p}>{t(P_KEYS[p])}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-zinc-500">Project</label>
+              <label className="text-xs text-muted-foreground">{t('tasks.project')}</label>
               <Select value={projectId || 'none'} onValueChange={v => { setProjectId(v === 'none' ? null : v); handleSave() }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">{t('common.none')}</SelectItem>
                   {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -101,7 +106,7 @@ export function TaskDetail({ task, onClose, projects }: TaskDetailProps): JSX.El
           )}
           <div className="pt-4 border-t border-border">
             <Button variant="destructive" size="sm" onClick={handleDelete} className="gap-1">
-              <Trash2 className="h-4 w-4" /> Delete Task
+              <Trash2 className="h-4 w-4" /> {t('tasks.delete')}
             </Button>
           </div>
         </div>

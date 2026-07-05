@@ -1,8 +1,12 @@
 import { useState } from 'react'
-import type { Project, CreateTaskDTO, TaskPriority, TaskStatus } from '@ceo-os/shared'
-import { PRIORITIES, TASK_STATUSES, PRIORITY_LABELS, STATUS_LABELS, createTaskSchema } from '@ceo-os/shared'
+import type { Project, TaskPriority, TaskStatus } from '@ceo-os/shared'
+import { PRIORITIES, TASK_STATUSES, createTaskSchema } from '@ceo-os/shared'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@ceo-os/ui'
 import { useTaskStore } from '../../stores/useTaskStore'
+import { useI18n } from '../../i18n'
+
+const P_KEYS: Record<string, string> = { urgent: 'priority.urgent', high: 'priority.high', medium: 'priority.medium', low: 'priority.low', none: 'priority.none' }
+const S_KEYS: Record<string, string> = { 'todo': 'status.todo', 'in-progress': 'status.inProgress', 'blocked': 'status.blocked', 'done': 'status.done' }
 
 interface TaskFormProps {
   open: boolean
@@ -11,6 +15,7 @@ interface TaskFormProps {
 }
 
 export function TaskForm({ open, onOpenChange, projects }: TaskFormProps): JSX.Element {
+  const { t } = useI18n()
   const createTask = useTaskStore(s => s.createTask)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -42,55 +47,35 @@ export function TaskForm({ open, onOpenChange, projects }: TaskFormProps): JSX.E
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Task</DialogTitle>
+          <DialogTitle>{t('tasks.create')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Input
-              placeholder="Task title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            />
+            <Input placeholder={t('tasks.title.placeholder')} value={title} onChange={e => setTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
             {errors.title && <span className="text-xs text-red-400">{errors.title}</span>}
           </div>
-          <Textarea
-            placeholder="Description (optional)"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            rows={2}
-          />
+          <Textarea placeholder={t('tasks.desc.placeholder')} value={description} onChange={e => setDescription(e.target.value)} rows={2} />
           <div className="grid grid-cols-2 gap-3">
             <Select value={priority} onValueChange={v => setPriority(v as TaskPriority)}>
-              <SelectTrigger><SelectValue placeholder="Priority" /></SelectTrigger>
-              <SelectContent>
-                {PRIORITIES.map(p => (
-                  <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
-                ))}
-              </SelectContent>
+              <SelectTrigger><SelectValue placeholder={t('tasks.priority')} /></SelectTrigger>
+              <SelectContent>{PRIORITIES.map(p => <SelectItem key={p} value={p}>{t(P_KEYS[p])}</SelectItem>)}</SelectContent>
             </Select>
             <Select value={status} onValueChange={v => setStatus(v as TaskStatus)}>
-              <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
-              <SelectContent>
-                {TASK_STATUSES.map(s => (
-                  <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
-                ))}
-              </SelectContent>
+              <SelectTrigger><SelectValue placeholder={t('tasks.status')} /></SelectTrigger>
+              <SelectContent>{TASK_STATUSES.map(s => <SelectItem key={s} value={s}>{t(S_KEYS[s])}</SelectItem>)}</SelectContent>
             </Select>
             <Select value={projectId || 'none'} onValueChange={v => setProjectId(v === 'none' ? null : v)}>
-              <SelectTrigger><SelectValue placeholder="Project" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('tasks.project')} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No Project</SelectItem>
-                {projects.map(p => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                ))}
+                <SelectItem value="none">{t('tasks.noProject')}</SelectItem>
+                {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
             <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleSubmit}>Create Task</Button>
+            <Button variant="outline" onClick={handleClose}>{t('common.cancel')}</Button>
+            <Button onClick={handleSubmit}>{t('tasks.create')}</Button>
           </div>
         </div>
       </DialogContent>

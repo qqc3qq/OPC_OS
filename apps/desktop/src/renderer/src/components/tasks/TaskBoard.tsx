@@ -1,12 +1,20 @@
 import { useState } from 'react'
 import type { Task, TaskStatus } from '@ceo-os/shared'
-import { TASK_STATUSES, STATUS_LABELS } from '@ceo-os/shared'
+import { TASK_STATUSES } from '@ceo-os/shared'
 import { TaskCard } from './TaskCard'
 import { useTaskStore } from '../../stores/useTaskStore'
+import { useI18n } from '../../i18n'
 import {
   DndContext, closestCorners, PointerSensor, useSensor, useSensors, type DragEndEvent
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+
+const STATUS_KEYS: Record<TaskStatus, string> = {
+  'todo': 'status.todo',
+  'in-progress': 'status.inProgress',
+  'blocked': 'status.blocked',
+  'done': 'status.done',
+}
 
 interface TaskBoardProps {
   tasks: Task[]
@@ -14,6 +22,7 @@ interface TaskBoardProps {
 }
 
 export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps): JSX.Element {
+  const { t } = useI18n()
   const updateStatus = useTaskStore(s => s.updateStatus)
   const reorder = useTaskStore(s => s.reorder)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -67,7 +76,7 @@ export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps): JSX.Element {
             <div key={status} className="flex-1 min-w-[280px] max-w-[350px]">
               <div className="flex items-center justify-between mb-3 px-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-300">{STATUS_LABELS[status]}</span>
+                  <span className="text-sm font-medium text-foreground">{t(STATUS_KEYS[status])}</span>
                   <span className="text-xs text-zinc-500 bg-card px-1.5 py-0.5 rounded">{colTasks.length}</span>
                 </div>
               </div>
@@ -82,8 +91,8 @@ export function TaskBoard({ tasks, onTaskClick }: TaskBoardProps): JSX.Element {
                     />
                   ))}
                   {colTasks.length === 0 && (
-                    <div className="flex items-center justify-center h-24 text-xs text-zinc-500 border border-dashed border-border rounded-lg">
-                      Drop tasks here
+                    <div className="flex items-center justify-center h-24 text-xs text-muted-foreground border border-dashed border-border rounded-lg">
+                      {t('tasks.drop')}
                     </div>
                   )}
                 </div>

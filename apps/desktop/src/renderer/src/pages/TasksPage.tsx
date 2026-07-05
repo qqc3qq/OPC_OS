@@ -3,13 +3,15 @@ import { useTaskStore } from '../stores/useTaskStore'
 import { useProjectStore } from '../stores/useProjectStore'
 import { PageHeader, Button, Input, LoadingSpinner } from '@ceo-os/ui'
 import { Plus, Search } from 'lucide-react'
-import type { TaskStatus, Task } from '@ceo-os/shared'
-import { TASK_STATUSES, STATUS_LABELS } from '@ceo-os/shared'
+import type { Task } from '@ceo-os/shared'
+import { TASK_STATUSES } from '@ceo-os/shared'
 import { TaskBoard } from '../components/tasks/TaskBoard'
 import { TaskForm } from '../components/tasks/TaskForm'
 import { TaskDetail } from '../components/tasks/TaskDetail'
+import { useI18n } from '../i18n'
 
 export function TasksPage(): JSX.Element {
+  const { t } = useI18n()
   const { tasks, fetchTasks, loading } = useTaskStore()
   const { projects, fetchProjects } = useProjectStore()
   const [search, setSearch] = useState('')
@@ -30,24 +32,27 @@ export function TasksPage(): JSX.Element {
     setSelectedTask(task)
   }, [])
 
-  if (loading) return <div><PageHeader title="Tasks" /><LoadingSpinner label="Loading tasks..." /></div>
+  const openCount = tasks.filter(t => t.status !== 'done').length
+  const doneCount = tasks.filter(t => t.status === 'done').length
+
+  if (loading) return <div><PageHeader title={t('tasks.title')} /><LoadingSpinner label={t('common.loading')} /></div>
 
   return (
     <div>
       <PageHeader
-        title="Tasks"
-        description={`${tasks.filter(t => t.status !== 'done').length} open, ${tasks.filter(t => t.status === 'done').length} done`}
+        title={t('tasks.title')}
+        description={`${openCount} ${t('status.inProgress')}, ${doneCount} ${t('status.done')}`}
         actions={
           <Button size="sm" onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-1" /> New Task
+            <Plus className="h-4 w-4 mr-1" /> {t('tasks.new')}
           </Button>
         }
       />
       <div className="mb-4">
         <div className="relative w-64">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search tasks..."
+            placeholder={t('tasks.search')}
             value={search}
             onChange={e => handleSearch(e.target.value)}
             className="pl-8"
