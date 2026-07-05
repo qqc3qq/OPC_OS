@@ -57,7 +57,14 @@ async function createWindow(): Promise<void> {
   }
 
   mainWindow.on('ready-to-show', () => { mainWindow?.show(); log('[main] shown') })
-  mainWindow.webContents.on('did-finish-load', () => log('[main] renderer loaded'))
+  mainWindow.webContents.on('did-finish-load', async () => {
+    log('[main] renderer loaded')
+    try {
+      const { autoUpdater } = await import('electron-updater')
+      autoUpdater.logger = { info: (m: string) => log('[update] ' + m), warn: (m: string) => log('[update] ' + m), error: (m: string) => log('[update] ' + m), debug: () => {}, silly: () => {} } as any
+      autoUpdater.checkForUpdatesAndNotify().catch(() => {})
+    } catch { log('[update] not available') }
+  })
   mainWindow.webContents.on('did-fail-load', (_e, c, d) => log('[main] LOAD FAIL: ' + c + ' ' + d))
 
   if (process.env.ELECTRON_RENDERER_URL) {

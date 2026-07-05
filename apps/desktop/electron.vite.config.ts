@@ -11,7 +11,7 @@ export default defineConfig({
     ],
     build: {
       rollupOptions: {
-        external: ['sql.js']
+        external: ['sql.js', 'electron-updater', 'builder-util-runtime']
       }
     }
   },

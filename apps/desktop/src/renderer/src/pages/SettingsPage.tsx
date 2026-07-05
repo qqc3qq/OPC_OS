@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { PageHeader, Card, CardContent, CardHeader, CardTitle, Button, Input, Separator } from '@ceo-os/ui'
 import { useUIStore } from '../stores/useUIStore'
 import { useI18n } from '../i18n'
 import { SeedData } from '../components/settings/SeedData'
-import { Globe, Moon, Sun } from 'lucide-react'
+import { Globe, Moon, Sun, Download } from 'lucide-react'
 
 export function SettingsPage(): JSX.Element {
   const { t, lang, setLang } = useI18n()
@@ -11,8 +11,13 @@ export function SettingsPage(): JSX.Element {
   const toggleTheme = useUIStore(s => s.toggleTheme)
   const [apiKey, setApiKey] = useState('')
   const [saved, setSaved] = useState(false)
+  const [updateMsg, setUpdateMsg] = useState('')
+  const [updating, setUpdating] = useState(false)
+
   useEffect(() => {
     setApiKey(localStorage.getItem('ceo-os-openai-key') || '')
+    const unsub = window.api.system.onUpdateReady(() => setUpdateMsg('ready'))
+    return unsub
   }, [])
 
   function handleSaveKey() {
@@ -86,6 +91,28 @@ export function SettingsPage(): JSX.Element {
               <Button variant="secondary" size="sm" onClick={() => window.api.system.saveDatabase()}>
                 {t('settings.db.save')}
               </Button>
+            </div>
+            <Separator />
+            <div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm">Updates</p>
+                  {updateMsg === 'checking' && <p className="text-xs text-muted-foreground">Checking...</p>}
+                  {updateMsg === 'latest' && <p className="text-xs text-green-400">You are up to date</p>}
+                  {updateMsg === 'downloading' && <p className="text-xs text-blue-400">Downloading update...</p>}
+                  {updateMsg === 'ready' && <p className="text-xs text-green-400">Update ready! Restart to apply.</p>}
+                  {updateMsg.startsWith('found:') && <p className="text-xs text-yellow-400">New version: {updateMsg.replace('found: ', '')}</p>}
+                  {updateMsg === 'error' && <p className="text-xs text-red-400">Check failed</p>}
+                  {!updateMsg && <p className="text-xs text-muted-foreground">Check for new versions</p>}
+                </div>
+                {updateMsg === 'ready' ? (
+                  <Button size="sm" onClick={() => window.api.system.installUpdate()}><Download className="h-3 w-3 mr-1" /> Restart to Update</Button>
+                ) : updateMsg.startsWith('found:') ? (
+                  <Button size="sm" onClick={installUpdate} disabled={updating}><Download className="h-3 w-3 mr-1" /> Download</Button>
+                ) : (
+                  <Button variant="secondary" size="sm" onClick={checkUpdate} disabled={updating}>Check for Updates</Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
