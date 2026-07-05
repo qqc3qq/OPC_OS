@@ -3,9 +3,11 @@ import { Button } from '@ceo-os/ui'
 import { useProjectStore } from '../../stores/useProjectStore'
 import { useTaskStore } from '../../stores/useTaskStore'
 import { todayISO } from '@ceo-os/shared'
+import { useI18n } from '../../i18n'
 import { toast } from '../../lib/toast'
 
 export function SeedData(): JSX.Element {
+  const { t } = useI18n()
   const [seeding, setSeeding] = useState(false)
   const { projects, fetchProjects, createProject } = useProjectStore()
   const { createTask } = useTaskStore()
@@ -13,59 +15,36 @@ export function SeedData(): JSX.Element {
   async function handleSeed() {
     setSeeding(true)
     try {
-      const existing = projects.length
-      if (existing > 0) {
-        toast('Data already exists. Clear it first.', 'error')
-        setSeeding(false)
-        return
-      }
-
+      if (projects.length > 0) { toast(t('seed.exists'), 'error'); setSeeding(false); return }
       const today = todayISO()
 
-      const ecommerce = await createProject({
-        name: 'E-Commerce Store', icon: 'shopping-cart', color: '#F59E0B',
-        description: 'Taobao shop operations', status: 'active'
-      })
-      const platform = await createProject({
-        name: 'Energy Platform', icon: 'zap', color: '#3B82F6',
-        description: 'Energy management SaaS', status: 'active'
-      })
-      const media = await createProject({
-        name: 'Social Media', icon: 'smartphone', color: '#EC4899',
-        description: 'Content creation and marketing', status: 'active'
-      })
-      const data = await createProject({
-        name: 'Data Platform', icon: 'bar-chart-3', color: '#8B5CF6',
-        description: 'Data analytics dashboard', status: 'active'
-      })
-      const web3 = await createProject({
-        name: 'Web3', icon: 'globe', color: '#06B6D4',
-        description: 'Blockchain and DeFi research', status: 'planning'
-      })
+      const e = await createProject({ name: t('seed.project1'), icon: 'shopping-cart', color: '#F59E0B', description: t('seed.project1desc'), status: 'active' })
+      const p = await createProject({ name: t('seed.project2'), icon: 'zap', color: '#3B82F6', description: t('seed.project2desc'), status: 'active' })
+      const m = await createProject({ name: t('seed.project3'), icon: 'smartphone', color: '#EC4899', description: t('seed.project3desc'), status: 'active' })
+      const d = await createProject({ name: t('seed.project4'), icon: 'bar-chart-3', color: '#8B5CF6', description: t('seed.project4desc'), status: 'active' })
+      const w = await createProject({ name: t('seed.project5'), icon: 'globe', color: '#06B6D4', description: t('seed.project5desc'), status: 'planning' })
 
-      await createTask({ title: 'Update product listings', projectId: ecommerce.id, priority: 'high', status: 'in-progress', dueDate: today })
-      await createTask({ title: 'Check ad performance metrics', projectId: ecommerce.id, priority: 'medium', status: 'todo', dueDate: today })
-      await createTask({ title: 'Reply to customer messages', projectId: ecommerce.id, priority: 'urgent', status: 'todo', dueDate: today })
-      await createTask({ title: 'Deploy API v2', projectId: platform.id, priority: 'high', status: 'in-progress', dueDate: today })
-      await createTask({ title: 'Fix login authentication bug', projectId: platform.id, priority: 'urgent', status: 'blocked', dueDate: today })
-      await createTask({ title: 'Draft weekly content calendar', projectId: media.id, priority: 'medium', status: 'todo', dueDate: today })
-      await createTask({ title: 'Write product review video script', projectId: media.id, priority: 'low', status: 'todo', dueDate: today })
-      await createTask({ title: 'Review analytics dashboard', projectId: data.id, priority: 'medium', status: 'todo', dueDate: today })
-      await createTask({ title: 'Research DeFi lending protocols', projectId: web3.id, priority: 'low', status: 'todo' })
-      await createTask({ title: 'Update supplier contracts', projectId: ecommerce.id, priority: 'high', status: 'todo' })
-      await createTask({ title: 'Review platform uptime report', projectId: platform.id, priority: 'medium', status: 'done', dueDate: today })
+      await createTask({ title: t('seed.task1'), projectId: e.id, priority: 'high', status: 'in-progress', dueDate: today })
+      await createTask({ title: t('seed.task2'), projectId: e.id, priority: 'medium', status: 'todo', dueDate: today })
+      await createTask({ title: t('seed.task3'), projectId: e.id, priority: 'urgent', status: 'todo', dueDate: today })
+      await createTask({ title: t('seed.task4'), projectId: p.id, priority: 'high', status: 'in-progress', dueDate: today })
+      await createTask({ title: t('seed.task5'), projectId: p.id, priority: 'urgent', status: 'blocked', dueDate: today })
+      await createTask({ title: t('seed.task6'), projectId: m.id, priority: 'medium', status: 'todo', dueDate: today })
+      await createTask({ title: t('seed.task7'), projectId: m.id, priority: 'low', status: 'todo', dueDate: today })
+      await createTask({ title: t('seed.task8'), projectId: d.id, priority: 'medium', status: 'todo', dueDate: today })
+      await createTask({ title: t('seed.task9'), projectId: w.id, priority: 'low', status: 'todo' })
+      await createTask({ title: t('seed.task10'), projectId: e.id, priority: 'high', status: 'todo' })
+      await createTask({ title: t('seed.task11'), projectId: p.id, priority: 'medium', status: 'done', dueDate: today })
 
       await fetchProjects()
-      toast('5 projects and 11 tasks created!', 'success')
-    } catch (err) {
-      toast('Failed to create seed data', 'error')
-    }
+      toast(t('seed.success', { projectCount: 5, taskCount: 11 }), 'success')
+    } catch { toast(t('seed.error'), 'error') }
     setSeeding(false)
   }
 
   return (
     <Button size="sm" onClick={handleSeed} disabled={seeding}>
-      {seeding ? 'Seeding...' : 'Load Sample Data'}
+      {seeding ? t('seed.loading') : t('seed.button')}
     </Button>
   )
 }

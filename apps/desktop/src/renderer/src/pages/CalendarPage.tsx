@@ -6,8 +6,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { startOfWeek, endOfWeek, formatDate } from '@ceo-os/shared'
 import type { Task } from '@ceo-os/shared'
 import { addDays, format } from 'date-fns'
+import { useI18n } from '../i18n'
 
 export function CalendarPage(): JSX.Element {
+  const { t } = useI18n()
   const { tasks, fetchTasks, loading } = useTaskStore()
   const projects = useProjectStore(s => s.projects)
   const [weekStart, setWeekStart] = useState(() => startOfWeek())
@@ -22,7 +24,7 @@ export function CalendarPage(): JSX.Element {
   for (let i = 0; i < 7; i++) {
     days.push(addDays(weekStart, i))
   }
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const dayNames = [t('calendar.mon'), t('calendar.tue'), t('calendar.wed'), t('calendar.thu'), t('calendar.fri'), t('calendar.sat'), t('calendar.sun')]
 
   const tasksByDay: Record<string, Task[]> = {}
   days.forEach(d => { tasksByDay[formatDate(d)] = [] })
@@ -38,13 +40,13 @@ export function CalendarPage(): JSX.Element {
   function nextWeek() { setWeekStart(s => addDays(s, 7)) }
   function goToday() { setWeekStart(startOfWeek()) }
 
-  if (loading) return <div><PageHeader title="Calendar" /><LoadingSpinner /></div>
+  if (loading) return <div><PageHeader title={t('calendar.title')} /><LoadingSpinner /></div>
 
   return (
     <div>
-      <PageHeader title="Calendar" description="Weekly view">
+      <PageHeader title={t('calendar.title')} description={t('calendar.week')}>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToday}>Today</Button>
+          <Button variant="outline" size="sm" onClick={goToday}>{t('calendar.today')}</Button>
           <Button variant="outline" size="icon" onClick={prevWeek}><ChevronLeft className="h-4 w-4" /></Button>
           <Button variant="outline" size="icon" onClick={nextWeek}><ChevronRight className="h-4 w-4" /></Button>
         </div>

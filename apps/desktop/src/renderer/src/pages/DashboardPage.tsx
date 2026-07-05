@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useProjectStore } from '../stores/useProjectStore'
 import { useTaskStore } from '../stores/useTaskStore'
-import { PageHeader, Card, CardHeader, CardTitle, CardContent, LoadingSpinner } from '@ceo-os/ui'
+import { PageHeader, LoadingSpinner } from '@ceo-os/ui'
+import { useI18n } from '../i18n'
 import { Greeting } from '../components/dashboard/Greeting'
 import { TopPriorities } from '../components/dashboard/TopPriorities'
 import { TodayTimeline } from '../components/dashboard/TodayTimeline'
@@ -11,6 +12,7 @@ import { AISuggestions } from '../components/dashboard/AISuggestions'
 import { QuickNote } from '../components/dashboard/QuickNote'
 
 export function DashboardPage(): JSX.Element {
+  const { t } = useI18n()
   const { projects, fetchProjects, loading: projectsLoading } = useProjectStore()
   const { tasks, fetchTasks, loading: tasksLoading } = useTaskStore()
   const [ready, setReady] = useState(false)
@@ -26,8 +28,8 @@ export function DashboardPage(): JSX.Element {
   if (projectsLoading || tasksLoading || !ready) {
     return (
       <div>
-        <PageHeader title="Dashboard" description="Today at a glance" />
-        <LoadingSpinner label="Loading your workspace..." />
+        <PageHeader title={t('dashboard.title')} description={t('dashboard.desc')} />
+        <LoadingSpinner label={t('common.loadingWorkspace')} />
       </div>
     )
   }
