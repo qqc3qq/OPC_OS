@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { TooltipProvider } from '@ceo-os/ui'
 import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { AppLayout } from './components/layout/AppLayout'
@@ -18,7 +18,7 @@ function AppRoutes(): JSX.Element {
   useKeyboardShortcuts()
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppLayout>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
@@ -33,7 +33,7 @@ function AppRoutes(): JSX.Element {
       </AppLayout>
       <CommandPalette />
       <Toast />
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
