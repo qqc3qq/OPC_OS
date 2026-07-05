@@ -6,8 +6,12 @@ directories:
 files:
   - out/**/*
   - node_modules/sql.js/**/*
+  - node_modules/electron-updater/**/*
+  - node_modules/builder-util-runtime/**/*
 asarUnpack:
   - node_modules/sql.js/**/*
+  - node_modules/electron-updater/**/*
+  - node_modules/builder-util-runtime/**/*
 win:
   target:
     - target: nsis
