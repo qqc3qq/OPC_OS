@@ -1,29 +1,16 @@
 import { app, BrowserWindow } from 'electron'
-import { join, dirname } from 'path'
-import { writeFileSync, mkdirSync, existsSync } from 'fs'
+import { join } from 'path'
+import { writeFileSync } from 'fs'
+import { homedir } from 'os'
 import { initDatabase, runMigrations, saveDatabase, closeDatabase } from '@ceo-os/database'
 import { registerAllHandlers } from './ipc'
 
 app.setName('CEO OS')
 
-// Log to install dir (resourcesPath is available before app is ready)
-const LOG_DIR = join(
-  dirname(process.resourcesPath || app.getPath('userData')),
-  'logs'
-)
-try { if (!existsSync(LOG_DIR)) mkdirSync(LOG_DIR, { recursive: true }) } catch {}
+const LOG = join(homedir(), 'Desktop', 'ceo-os.log')
 
 function log(msg: string) {
-  try {
-    writeFileSync(join(LOG_DIR, 'app.log'), msg + '\n', { flag: 'a' })
-  } catch {
-    // Last resort: userData
-    try {
-      const d = join(app.getPath('userData'), 'logs')
-      if (!existsSync(d)) mkdirSync(d, { recursive: true })
-      writeFileSync(join(d, 'app.log'), msg + '\n', { flag: 'a' })
-    } catch {}
-  }
+  try { writeFileSync(LOG, msg + '\n', { flag: 'a' }) } catch {}
 }
 
 log('=== CEO OS v0.0.4 ===')
